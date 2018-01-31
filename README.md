@@ -1,10 +1,10 @@
 # PEAS (Predict Enhancers from ATAC-seq)
 
-##Getting started
-Please refer to the Manual (PEASManual.pdf) for installing dependencies and information on how to run feature extraction and prediction scripts.
+## Getting started
+Please refer to the Manual (PEAS_Manual.pdf) for installing dependencies and information on how to run feature extraction and prediction scripts.
 
 
-##Feature Extraction Files
+## Feature Extraction Files
 
 * **PEASFeatureExtraction.sh** - Core shell script to extract features from aligned paired-end ATAC-seq data (.bam)
 * **PEASTools.jar** - Required JAR file used by the shell script.  Source for this JAR file is available in the PEASTools directory.
@@ -13,7 +13,7 @@ Please refer to the Manual (PEASManual.pdf) for installing dependencies and info
 * **CTCF.motifs** - CTCF PWMs.
 * **phastCons46wayPlacental.bed** - Conservation BED files.
 
-##Prediction Files
+## Prediction Files
 
 * **PEASPredictor.py** - Core python file used for training a neural network model and making predictions.
 * **PEAS_util.py** - Utility code used by the prediction python script.

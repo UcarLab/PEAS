@@ -19,7 +19,7 @@ public class AnnotatePeaks {
 	
 	public static void main(String[] args){
 		AnnotatePeaks ap = new AnnotatePeaks();
-		ap.annotatePeaks(args[0],args[1],args[2]);
+		ap.annotatePeaks(args[0],args[1],args[2]);		
 	}
 	
 
@@ -71,7 +71,7 @@ public class AnnotatePeaks {
 				int start = Integer.parseInt(split[1]);
 				int end = Integer.parseInt(split[2]);
 				bw.write(line);
-				String[] finalstate = getFinalState(end-start+1, states, freq[i]);
+				String[] finalstate = getFinalState(end-start, states, freq[i]);
 				bw.write("\t"+finalstate[0]+"\t"+finalstate[1]+"\t"+finalstate[2]+"\t"+finalstate[3]);
 				bw.write("\n");
 			}
@@ -246,7 +246,7 @@ public class AnnotatePeaks {
 				continue;
 			}
 			else{
-				int count = Math.min(cend, end)-Math.max(cstart, start);
+				int count = Math.max(Math.min(cend, end)-Math.max(cstart, start), 1);
 				counts[states.get(chl.getState())] += count;
 			}
 		}

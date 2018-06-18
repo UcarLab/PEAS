@@ -11,6 +11,17 @@ import org.jax.peastools.merge.Merge;
 public class Main {
 
 	public static void main(String[] args){
+		if(args.length == 0){
+			System.out.println("PEAS Tools Options:");
+			System.out.println("insertsizethresh");
+			System.out.println("insertmetrics");
+			System.out.println("conservation");
+			System.out.println("merge");
+			System.out.println("filter");
+			System.out.println("bamfilter");
+			System.out.println("annotate");
+			return;
+		}
 		String protocol = args[0].toLowerCase();
 		
 		String[] restargs = new String[args.length-1];

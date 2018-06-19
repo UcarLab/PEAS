@@ -19,8 +19,8 @@ public class TrainModelOptions extends JPanel{
 
 	public TrainModelOptions(UIUtil util, JFileChooser fc, String path, FileFilter featurefilter){
 		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		_fifield = new JTextField(path+"features.txt");
-		_labelfield = new JTextField(path+"labelencoder.txt");
+		_fifield = new JTextField(path+"models/features.txt");
+		_labelfield = new JTextField(path+"models/labelencoder.txt");
 		
 		_fibutton = new JButton("...");
 		_labelbutton = new JButton("...");
@@ -39,8 +39,8 @@ public class TrainModelOptions extends JPanel{
 	}
 	
 	public void setPath(String path){
-		_fifield.setText(path+"features.txt");
-		_labelfield.setText(path+"labelencoder.txt");
+		_fifield.setText(path+"models/features.txt");
+		_labelfield.setText(path+"models/labelencoder.txt");
 	}
 	
 	public void setEnabled(boolean enabled){

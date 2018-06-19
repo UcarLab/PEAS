@@ -18,10 +18,10 @@ public class ExtractFeaturesOptions extends JPanel{
 
 	public ExtractFeaturesOptions(UIUtil util, JFileChooser fc, String path, FileFilter bedfilter, FileFilter motifsfilter){
 		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		_peakfield = new JTextField(path+"hg19.filter.bed");
-		_knownfield = new JTextField(path+"humantop_Nov2016_HOMER.motifs");
-		_consfield = new JTextField(path+"phastCons46wayPlacental.bed");
-		_ctcffield = new JTextField(path+"CTCF.motifs");
+		_peakfield = new JTextField(path+"extraction_files/hg19.filter.bed");
+		_knownfield = new JTextField(path+"extraction_files/humantop_Nov2016_HOMER.motifs");
+		_consfield = new JTextField(path+"extraction_files/phastCons46wayPlacental.bed");
+		_ctcffield = new JTextField(path+"extraction_files/CTCF.motifs");
 
 		util.setFieldPanel(this, fc, new JLabel("Peak Filter:"), _peakfield, new JButton("..."), bedfilter, false);
 		util.setFieldPanel(this, fc, new JLabel("Known Motifs:"), _knownfield, new JButton("..."), motifsfilter, false);
@@ -31,10 +31,10 @@ public class ExtractFeaturesOptions extends JPanel{
 	}
 	
 	public void setPath(String path){
-		_peakfield.setText(path+"hg19.filter.bed");
-		_knownfield.setText(path+"humantop_Nov2016_HOMER.motifs");
-		_consfield.setText(path+"phastCons46wayPlacental.bed");
-		_ctcffield.setText(path+"CTCF.motifs");
+		_peakfield.setText(path+"extraction_files/hg19.filter.bed");
+		_knownfield.setText(path+"extraction_files/humantop_Nov2016_HOMER.motifs");
+		_consfield.setText(path+"extraction_files/phastCons46wayPlacental.bed");
+		_ctcffield.setText(path+"extraction_files/CTCF.motifs");
 	}
 	
 	

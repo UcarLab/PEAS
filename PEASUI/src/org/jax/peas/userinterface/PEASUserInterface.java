@@ -5,14 +5,11 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
-import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -89,16 +86,16 @@ public class PEASUserInterface {
 	}
 	
 	public PEASUserInterface(){
-		try {
-			_path = PEASUserInterface.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-		}
+		//try {
+			_path = System.getProperty("user.dir");//PEASUserInterface.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+		//} catch (URISyntaxException e) {
+			//e.printStackTrace();
+		//}
 		_fc.setCurrentDirectory(new File(_path));
 		
 		//Path related fields that need to know about each other and update
-		_eclassfield = new JTextField(_path+"classes.txt");
-		_tclassfield = new JTextField(_path+"classes.txt");
+		_eclassfield = new JTextField(_path+"models/classes.txt");
+		_tclassfield = new JTextField(_path+"models/classes.txt");
 		_pathfield = new JTextField(_path);
 		_pathfield.setColumns(15);
 		_pcfield = new JTextField(_pythoncmd);
@@ -107,8 +104,8 @@ public class PEASUserInterface {
 		_tm = new TrainModelOptions(_util, _fc, _path, _featurefilter);
 		_ptm = new TrainModelOptions(_util, _fc, _path, _featurefilter);
 		_efo = new ExtractFeaturesOptions(_util, _fc, _path, _bedfilter, _motifsfilter);
-		_emf = new JTextField(_path+"enhancermodel.pkl");
-		_pmf = new JTextField(_path+"promotermodel.pkl");
+		_emf = new JTextField(_path+"models/enhancermodel.pkl");
+		_pmf = new JTextField(_path+"models/promotermodel.pkl");
 		
 		//Set up the Frame
 		_frame = new JFrame();
@@ -146,8 +143,10 @@ public class PEASUserInterface {
 
 		leftpanel.setLayout(new BoxLayout(leftpanel, BoxLayout.Y_AXIS));
 		try {
-			BufferedImage logo = ImageIO.read(new FileInputStream("resources/logo.png"));
-			ImageIcon logoicon = new ImageIcon(logo);
+			
+			URL logourl = PEASUserInterface.class.getResource("/resources/logo.png");
+			//BufferedImage logo = ImageIO.read(logourl);
+			ImageIcon logoicon = new ImageIcon(logourl);
 			JLabel logolabel = new JLabel();
 			logolabel.setSize(100,100);
 			logolabel.setIcon(logoicon);
@@ -1020,10 +1019,10 @@ public class PEASUserInterface {
 		_etm.setPath(_path);
 		_ptm.setPath(_path);
 		_efo.setPath(_path);
-		_emf.setText(_path+"enhancermodel.pkl");
-		_pmf.setText(_path+"promotermodel.pkl");
-		_tclassfield.setText(_path+"classes.txt");
-		_eclassfield.setText(_path+"classes.txt");
+		_emf.setText(_path+"models/enhancermodel.pkl");
+		_pmf.setText(_path+"models/promotermodel.pkl");
+		_tclassfield.setText(_path+"models/classes.txt");
+		_eclassfield.setText(_path+"models/classes.txt");
 
 	}
 	

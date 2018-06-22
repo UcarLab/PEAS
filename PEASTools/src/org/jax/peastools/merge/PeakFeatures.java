@@ -11,7 +11,6 @@ public class PeakFeatures extends Location {
 	
 	private int _insertcount;
 	private double _insertmean;
-	private double _insertmedian;
 	private double _insertratio;
 	
 	private String _annotation;
@@ -20,7 +19,6 @@ public class PeakFeatures extends Location {
 	
 	private double _cpg;
 	private double _gc;
-	private double _maxcons;
 	private double _meancons;
 	private double _motif;
 	private double _dmotif;
@@ -64,9 +62,6 @@ public class PeakFeatures extends Location {
 		_insertmean = insertmean;
 	}
 	
-	public void setInsertMedian(double insertmedian){
-		_insertmedian = insertmedian;
-	}
 	
 	public void setInsertRatio(double insertratio){
 		_insertratio = insertratio;
@@ -93,10 +88,7 @@ public class PeakFeatures extends Location {
 		_gc = gc;
 	}
 	
-	public void setMaxCons(double maxcons){
-		_maxcons = maxcons;
-	}
-	
+
 	public void setMeanCons(double meancons){
 		_meancons = meancons;
 	}
@@ -175,7 +167,6 @@ public class PeakFeatures extends Location {
 		//Insert Features
 		sb.append(_insertcount+"\t");
 		sb.append(_insertmean+"\t");
-		sb.append(_insertmedian+"\t");
 		sb.append(_insertratio+"\t");
 		
 		
@@ -188,7 +179,6 @@ public class PeakFeatures extends Location {
 		sb.append(_densecuts+"\t");
 		
 		//Conservation
-		sb.append(_maxcons+"\t");
 		sb.append(_meancons+"\t");
 		
 		
@@ -217,30 +207,28 @@ public class PeakFeatures extends Location {
 		sb.append("Peak Length\t");
 		sb.append("Fold Change\t");
 		sb.append("Summit Pileup\t");
-		sb.append("Summit Position\t");
+		sb.append("Summit Center Distance\t");
 		
 		
 		//Insert Features
-		sb.append("Insert Count\t");
+		sb.append("# of all inserts\t");
 		sb.append("Insert Mean\t");
-		sb.append("Insert Median\t");
-		sb.append("Insert Ratio\t");
-		sb.append("Inserts (0,50]\t");
-		sb.append("Inserts (50, 150]\t");
-		sb.append("Inserts (150,300]\t");
-		sb.append("Inserts (300,500]\t");
-		sb.append("Inserts (500,)\t");
-		sb.append("Cut Count\t");
-		sb.append("Significant Cuts\t");
+		sb.append("Long/Short Insert Ratio\t");
+		sb.append("# of all inserts (0,50]\t");
+		sb.append("# of all inserts (50,150]\t");
+		sb.append("# of all inserts (150,300]\t");
+		sb.append("# of all inserts (300,500]\t");
+		sb.append("# of all inserts (500,0)\t");
+		sb.append("# of cuts within peak\t");
+		sb.append("# of overrepresented cuts\t");
 		
 		//Conservation
-		sb.append("Max Conservation Score\t");
-		sb.append("Mean Conservation Score\t");
+		sb.append("Conservation (Mean)\t");
 		
 		//HOMER Features
 		sb.append("GC%\t");
-		sb.append("CPG%\t");
-		sb.append("Annotation\t");
+		sb.append("CpG%\t");
+		sb.append("Annotation (HOMER)\t");
 		sb.append("Distance to TSS\t");
 		sb.append("Gene Type");
 
@@ -249,7 +237,7 @@ public class PeakFeatures extends Location {
 	
 	
 	public static String getMergedMotifColumnLabels(){
-		return "Known Motif%\tDenovo Motif%\tCTCF Motifs";
+		return "Known Motif%\tDenovo Motif%\t# of CTCF Motifs";
 	}
 	
 	public String getMotifFeatures(){

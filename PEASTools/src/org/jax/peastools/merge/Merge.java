@@ -132,7 +132,6 @@ public class Merge {
 					pf.setInsertCount(Integer.parseInt(split[4]));
 					pf.setCutCount(Integer.parseInt(split[5]));
 					pf.setInsertMean(Double.parseDouble(split[6]));
-					pf.setInsertMedian(Double.parseDouble(split[7]));
 					pf.setInsertRatio(Double.parseDouble(split[8]));
 					pf.setB50(Double.parseDouble(split[9]));
 					pf.setB150(Double.parseDouble(split[10]));
@@ -154,10 +153,8 @@ public class Merge {
 				String id = split[3];
 				PeakFeatures pf = _peaks.get(id);
 				if(pf != null){
-					double maxcons = Double.parseDouble(split[4]);
 					double meancons = Double.parseDouble(split[5]);
 
-					pf.setMaxCons(maxcons);
 					pf.setMeanCons(meancons);
 				}
 			}

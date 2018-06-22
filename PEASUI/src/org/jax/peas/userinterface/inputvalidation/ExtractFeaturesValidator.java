@@ -8,6 +8,7 @@ public class ExtractFeaturesValidator implements InputValidator{
 	private String _bamfile;
 	private String _outdir;
 	private String _fastafile;
+	private String _reference;
 	private String _peakfilter;
 	private String _motifs;
 	private String _conservation;
@@ -16,7 +17,7 @@ public class ExtractFeaturesValidator implements InputValidator{
 	private boolean _haserror;
 	private String _errormessages;
 	
-	public ExtractFeaturesValidator(String path, String bamfile, String outdir, String fasta, String filter, String motifs, String conservation, String ctcf){
+	public ExtractFeaturesValidator(String path, String bamfile, String outdir, String fasta, String reference, String filter, String motifs, String conservation, String ctcf){
 		StringBuilder errormessages = new StringBuilder();
 		_haserror = false;
 		
@@ -53,6 +54,12 @@ public class ExtractFeaturesValidator implements InputValidator{
 		if(_peakfilter.equals("") || !(new File(_peakfilter)).exists()){
 			_haserror = true;
 			errormessages.append("Peak filter file does not exist.\n");
+		}
+		
+		_reference = reference.trim();
+		if(_reference.equals("")){
+			_haserror = true;
+			errormessages.append("HOMER reference genome is not specified.\n");
 		}
 		
 		_motifs = motifs.trim();
@@ -109,6 +116,8 @@ public class ExtractFeaturesValidator implements InputValidator{
 		sb.append(" ");
 		sb.append("\""+_fastafile+"\"");
 		sb.append(" ");
+		sb.append("\""+_reference+"\"");
+		sb.append(" ");
 		sb.append("\""+_peakfilter+"\"");
 		sb.append(" ");
 		sb.append("\""+_motifs+"\"");
@@ -116,28 +125,15 @@ public class ExtractFeaturesValidator implements InputValidator{
 		sb.append("\""+_conservation+"\"");
 		sb.append(" ");
 		sb.append("\""+_ctcf+"\"");
+		sb.append(" ");
+		sb.append("\""+_path+"\"");
 
 		return sb.toString();
 	}
 	
 	@Override
 	public String[] getCommandArray() {
-		int lastidx = _bamfile.lastIndexOf("/")+1;
-		String bamdir = _bamfile.substring(0, lastidx);
-		String prefix = _bamfile.substring(lastidx, _bamfile.lastIndexOf("."));
-		
-		String[] cmd = new String[] {"/bin/bash", "--login", "-c", 
-				_path+"PEASFeatureExtraction.sh",
-				bamdir,
-				prefix,
-				_outdir,
-				_fastafile,
-				_peakfilter,
-				_motifs,
-				_conservation,
-				_ctcf};
-		
-		return cmd;
+		return new String[] {"/bin/bash", "--login", "-c", getCommand()};
 	}
 
 

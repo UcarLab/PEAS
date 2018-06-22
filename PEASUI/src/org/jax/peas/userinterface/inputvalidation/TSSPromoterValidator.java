@@ -76,6 +76,10 @@ public class TSSPromoterValidator implements InputValidator {
 		_errormessage = errormessages.toString();
 	}
 	
+	public String getOutputDirectory(){
+		return _outdir;
+	}
+	
 	public String getPredictionFile(){
 		return _dest;
 	}

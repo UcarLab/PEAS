@@ -86,11 +86,11 @@ public class PEASUserInterface {
 	}
 	
 	public PEASUserInterface(){
-		//try {
-			_path = System.getProperty("user.dir");//PEASUserInterface.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
-		//} catch (URISyntaxException e) {
-			//e.printStackTrace();
-		//}
+		_path = System.getProperty("user.dir");
+		if(!_path.endsWith("/")){
+			_path += "/";
+		}
+		
 		_fc.setCurrentDirectory(new File(_path));
 		
 		//Path related fields that need to know about each other and update
@@ -429,7 +429,11 @@ public class PEASUserInterface {
 		final JTextField tsscolumn = new JTextField("24");
 		tsscolumn.setColumns(3);
 		final JTextField upfield = new JTextField("2000");
+		upfield.setColumns(6);
+
 		final JTextField downfield = new JTextField("2000");
+		downfield.setColumns(6);
+
 		
 		tssoptions.add(_util.getHorizontalField(new JLabel("Distance to TSS Column:"), tsscolumn), BorderLayout.CENTER);
 		tssoptions.add(_util.getHorizontalField( new JLabel("Upstream:"), upfield, new JLabel("Downstream:"), downfield), BorderLayout.SOUTH);
@@ -532,7 +536,15 @@ public class PEASUserInterface {
 					error = tsspv.hasError();
 					errormessages = tsspv.getErrorMessage();
 					cmd = tsspv.getCommandArray();
-					predictionfile = tsspv.getPredictionFile();
+					
+					if(!error){
+						PredictionAnnotator[] pa = new PredictionAnnotator[1];
+						pa[0] = new PredictionAnnotator(_pythoncmd, _path, _promoterfeaturefile.getText(), tsspv.getPredictionFile());
+						
+						postfunction = new MultiPredictionAnnotator(pa);
+						predictionfile = ((MultiPredictionAnnotator)postfunction).getPredictionFile(tsspv.getOutputDirectory(), "promoter");
+					}
+					
 				}
 				
 				if(error){
@@ -782,7 +794,7 @@ public class PEASUserInterface {
 				boolean error = false;
 				String errormessages = "";
 				
-				ExtractFeaturesValidator efv = new ExtractFeaturesValidator(_path, bamfield.getText(), outfield.getText(), fastafield.getText(), efo.getPeakField(), efo.getKnownMotifField(), efo.getConservationField(), efo.getCTCFField());
+				ExtractFeaturesValidator efv = new ExtractFeaturesValidator(_path, bamfield.getText(), outfield.getText(), fastafield.getText(), efo.getReference(), efo.getPeakField(), efo.getKnownMotifField(), efo.getConservationField(), efo.getCTCFField());
 				error = efv.hasError();
 				errormessages = efv.getErrorMessage();
 				
@@ -808,7 +820,7 @@ public class PEASUserInterface {
 				boolean error = false;
 				String errormessages = "";
 				
-				ExtractFeaturesValidator efv = new ExtractFeaturesValidator(_path, bamfield.getText(), outfield.getText(), fastafield.getText(), efo.getPeakField(), efo.getKnownMotifField(), efo.getConservationField(), efo.getCTCFField());
+				ExtractFeaturesValidator efv = new ExtractFeaturesValidator(_path, bamfield.getText(), outfield.getText(), fastafield.getText(), efo.getReference(), efo.getPeakField(), efo.getKnownMotifField(), efo.getConservationField(), efo.getCTCFField());
 				error = efv.hasError();
 				errormessages = efv.getErrorMessage();
 				
@@ -855,6 +867,8 @@ public class PEASUserInterface {
 		final JTextField outdirfield = new JTextField();
 		_util.setFieldPanel(comp, _fc, new JLabel("Output Directory:"), outdirfield, new JButton("..."), null, true);
 		final JTextField pfield = new JTextField();
+		pfield.setColumns(12);
+
 		combinedpanel.add(_util.getHorizontalField(new JLabel("Model Parameters:"), pfield));
 		JPanel notepanel = new JPanel();
 		JLabel note = new JLabel("parameter1=value1, parameter2=value2, ...");
@@ -869,6 +883,7 @@ public class PEASUserInterface {
 		_util.setFieldPanel(combinedpanel, _fc, new JLabel("Class File:"), _tclassfield, new JButton("..."), null, false);
 		
 		final JTextField rsfield = new JTextField("929");
+		rsfield.setColumns(12);
 		combinedpanel.add(_util.getHorizontalField(new JLabel("Random State:"), rsfield));
 		
 		MoreOptionsPanel motm = new MoreOptionsPanel(combinedpanel); 

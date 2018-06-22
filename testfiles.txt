@@ -1,1 +1,0 @@
-Islet 6	<your local path>/Islet6_features_cellagnostic.txt

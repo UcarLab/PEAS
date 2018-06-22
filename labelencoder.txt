@@ -1,2 +1,0 @@
-23	3'	5'	exon	Intergenic	intron	non-coding	promoter-TSS	TTS
-25	pseudo	ncRNA	protein-coding	snoRNA	snRNA

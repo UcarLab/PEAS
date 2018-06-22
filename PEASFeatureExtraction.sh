@@ -11,10 +11,11 @@ inDir="${args[0]}"
 prefix="${args[1]}"
 outDir="${args[2]}"
 fasta="${args[3]}"
-filterpeaks="${args[4]}"
-homermotifs="${args[5]}"
-conservation="${args[6]}"
-ctcfmotifs="${args[7]}"
+homerref="${args[4]}"
+filterpeaks="${args[5]}"
+homermotifs="${args[6]}"
+conservation="${args[7]}"
+ctcfmotifs="${args[8]}"
 nfrsize="150"
 
 cd "${outDir}"
@@ -22,7 +23,7 @@ cd "${outDir}"
 mkdir peak_features
 cd peak_features
 
-jarpath="${args[8]}/"
+jarpath="${args[9]}/"
 
 
 ##Sort BAM  #TODO add option to skip this step if already sorted
@@ -46,7 +47,7 @@ java -jar "${jarpath}PEASTools.jar" filter "${prefix}_peaks.narrowPeak" "${filte
 
 echo "--- Calling annotations & known motifs. ---"
 #HOMER Annotations
-annotatePeaks.pl "${prefix}_peaks.filtered" hg19 -m "${homermotifs}" -nmotifs > ${prefix}_peaks_annotated.bed
+annotatePeaks.pl "${prefix}_peaks.filtered" "${homerref}" -m "${homermotifs}" -nmotifs > ${prefix}_peaks_annotated.bed
 
 #call denovo motifs
 echo "--- Calling denovo motifs. ---"
@@ -58,12 +59,12 @@ rm "${outDir}/denovo/merge/"*.similar*
 rm "${outDir}/denovo/merge/"*RV.motif
 cat "${outDir}/denovo/merge/"*.motif >> "${outDir}/denovo/merge/merged.motifs"
 #call motifs with homer again using denovo motifs file homerMotifs.all.motifs
-annotatePeaks.pl "${prefix}_peaks.filtered" hg19 -m "${outDir}/denovo/merge/merged.motifs" -nmotifs > ${prefix}_peaks_denovo.bed
+annotatePeaks.pl "${prefix}_peaks.filtered" "${homerref}" -m "${outDir}/denovo/merge/merged.motifs" -nmotifs > ${prefix}_peaks_denovo.bed
 
-echo "-- Calling CTCF motifs. --"
-annotatePeaks.pl "${prefix}_peaks.filtered" hg19 -m "${ctcfmotifs}" -nmotifs > ${prefix}_peaks_ctcf.bed
+echo "--- Calling CTCF motifs. ---"
+annotatePeaks.pl "${prefix}_peaks.filtered" "${homerref}" -m "${ctcfmotifs}" -nmotifs > ${prefix}_peaks_ctcf.bed
 
-##check this Get the insert size threshold to remove outlier inserts
+#Get the insert size threshold to remove outlier inserts
 echo "--- Getting insert size threshold. ---"
 java -jar "${jarpath}PEASTools.jar" insertsizethresh "${prefix}_sorted.bam" "${outDir}/peak_features"
 thresh=$(cat "thresh.txt")
@@ -86,8 +87,8 @@ java -jar "${jarpath}PEASTools.jar" conservation "${prefix}_peaks.filtered" "${c
 
 echo "--- Merging features. ---"
 #Merge Features #TODO add new features
-java -jar "${jarpath}PEASTools.jar" merge "${prefix}_peaks.filtered" "${prefix}_peaks.xls" "${prefix}_peaks_annotated.bed" "${prefix}_insertmetrics.txt" "${prefix}_conservation.txt" "${prefix}_peaks_denovo.bed" "${prefix}_peaks_ctcf.bed" "${prefix}_features_cellspecific.txt"
+#java -jar "${jarpath}PEASTools.jar" merge "${prefix}_peaks.filtered" "${prefix}_peaks.xls" "${prefix}_peaks_annotated.bed" "${prefix}_insertmetrics.txt" "${prefix}_conservation.txt" "${prefix}_peaks_denovo.bed" "${prefix}_peaks_ctcf.bed" "${prefix}_features_cellspecific.txt"
 
-java -jar "${jarpath}PEASTools.jar" merge "${prefix}_peaks.filtered" "${prefix}_peaks.xls" "${prefix}_peaks_annotated.bed" "${prefix}_insertmetrics.txt" "${prefix}_conservation.txt" "${prefix}_peaks_denovo.bed" "${prefix}_peaks_ctcf.bed" "${prefix}_features_cellagnostic.txt" "MERGED"
+java -jar "${jarpath}PEASTools.jar" merge "${prefix}_peaks.filtered" "${prefix}_peaks.xls" "${prefix}_peaks_annotated.bed" "${prefix}_insertmetrics.txt" "${prefix}_conservation.txt" "${prefix}_peaks_denovo.bed" "${prefix}_peaks_ctcf.bed" "${prefix}_features.txt" "MERGED"
 
 

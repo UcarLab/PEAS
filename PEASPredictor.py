@@ -1,115 +1,96 @@
 import sys
-import numpy as np
 import pandas as pd
-from sklearn.neural_network import MLPClassifier
+import numpy as np
+import PEASUtil
 from sklearn import preprocessing
-from sklearn.pipeline import Pipeline
+from sklearn.externals import joblib
+import argparse
+import os
 
-import PEAS_util
+wd = os.getcwd()
 
-args = sys.argv
+parser = argparse.ArgumentParser(description='Loads a model and makes predictions on ATAC-Seq peaks.')
+parser.add_argument('modelfile', type=str, help='The filepath for the saved model (*.pkl).')
+parser.add_argument('featurefiles', type=str, help='File listing the file paths of all features to train the model.')
 
-#arg1: File containing list of files to process (two column label, filepath)
-filedata = pd.read_csv(args[1], sep="\t", header=None)
-flabels = filedata.iloc[:,0].values
-print(flabels)
-trainfiles = filedata.iloc[:,1].values
+parser.add_argument('-o', dest='out', type=str, help='The selected directory saving outputfiles.')
+parser.add_argument('-p', dest='prefix', type=str, help='Prefix for saving files.')
+parser.add_argument('-f', dest='features', help='Feature index file specifying which columns to include in the feature matrix.', type=str)
+parser.add_argument('-c', dest='classes', type=str,
+                    help='File containing class label transformations into integer representations. Also used for filtering peaks based on classes.')
+parser.add_argument('-l', dest='labelencoder', help='File containing feature label transformations into integer representations.', type=str)
+parser.add_argument('-e', dest='evalmode', action='store_true',
+                    help='Whether or not to compare predictions with provided class labels.')
 
-#arg2: File for feature columns (two column specifying ranges [start,end) )
-featurecoldata = pd.read_csv(args[2], sep="\t", header=None).values
-features = []
-for i in range(0, len(featurecoldata)):
-    features.extend(range(featurecoldata[i,0], featurecoldata[i,1]))
+args = parser.parse_args()
 
-#arg3: File for classes (three column: column, value, conversion) 
-#conversion must be 0, 1, or -1 where -1 means the data element is not used
-classconversion = pd.read_csv(args[3], sep="\t", header=None).values #promoter vs enhancer/other
+modelfile = args.modelfile
+datasetlabels, datasetfiles = PEASUtil.getDatasets(args.featurefiles)
 
-#arg4: Random State
-rstate = int(args[4])
+#Optional Arguments
+featurefiledirectory = os.path.dirname(args.featurefiles)
+featurefilename = os.path.splitext(os.path.basename(args.featurefiles))[0]
 
-#arg5: output directory for the model
-outdir = args[5]
+if args.prefix is not None:
+    prefix = args.prefix
+    prefixfile = args.prefix.replace(" ", "_")
+else:
+    prefix = featurefilename
+    prefixfile = featurefilename.replace(" ", "_")
 
-#arg6: File for string feature conversions (Col1: Feature column, Subsequent columns, String values) 
-labelencoders = []
-ledata = pd.read_csv(args[6], sep="\t", header=None)
-for i in range(0, len(ledata)):
-    cur = ledata.iloc[i,1:].values
-    lei = cur.astype(str)
-    labelencoders.append(list(lei[lei != 'nan']))
-    labelencoders[i].insert(0, ledata.iloc[i,0])
-    
+if args.out is not None:
+    outdir = PEASUtil.getFormattedDirectory(args.out)
+else:
+    outdir = PEASUtil.getFormattedDirectory(featurefiledirectory)
 
-if not(outdir.endswith("/")):
-    outdir = outdir+"/"
+if args.features is not None:
+    featurecolumns = PEASUtil.getFeatureColumnData(args.features)
+else:
+    featurecolumns = PEASUtil.getFeatureColumnData(wd+"/features.txt")
+
+evalmode = args.evalmode
+if args.classes is not None:
+    classconversion = PEASUtil.getClassConversions(args.classes)
+elif evalmode:
+    classconversion = PEASUtil.getClassConversions(wd+"/classes.txt")
+else:
+    classconversion = None
+
+if args.labelencoder is not None:
+    labelencoder = PEASUtil.getLabelEncoder(args.labelencoder)
+else:
+    labelencoder = PEASUtil.getLabelEncoder(wd+"/labelencoder.txt")
 
 
-filedata = pd.read_csv(args[7], sep="\t", header=None)
-flabels = filedata.iloc[:,0].values
-print(flabels)
-testfiles = filedata.iloc[:,1].values
+#loading model
+print("Loading model.")
+clf = joblib.load(modelfile)
 
-testclassconversion = pd.read_csv(args[8], sep="\t", header=None).values
-
-#TODO load saved model if one is available
+#make predictions
+print("Reading features and making predictions.")
+allproba = []
+ally = []
+allpred = []
+alldata = []
 imputer = preprocessing.Imputer(missing_values='NaN', strategy='mean', axis=0)
-scaler = preprocessing.StandardScaler()
 
-la =  MLPClassifier(random_state=rstate, verbose=True)#hidden_layer_sizes=(50, 25),activation='tanh',alpha=0.0001,beta_1=0.9, beta_2=0.9999, epsilon=0.00000001,random_state=rstate,learning_rate_init=0.001, verbose=True)
-clf = Pipeline(steps=[('la', la)])
+for i in range(0,len(datasetfiles)):
+    curdatalabel = datasetlabels[i]
+    curfile = datasetfiles[i]
+    curdata = pd.read_csv(curfile, sep="\t")
+    testX, testy, _, data = PEASUtil.getData(curdata, featurecolumns, labelencoder, classconversion)
+    testX = preprocessing.StandardScaler().fit_transform(imputer.fit_transform(testX))
+    allproba.append(clf.predict_proba(testX))
+    allpred.append(clf.predict(testX))
+    ally.append(testy)
+    alldata.append(data)
+    PEASUtil.writePredictions(outdir+prefixfile+"_"+curdatalabel+"_predictions.txt", allpred[i], allproba[i], ally[i], alldata[i], evalmode)
+    if evalmode:
+        PEASUtil.plotConfusionMatrix(testy, allpred[-1], curdatalabel, np.unique(testy), outdir+prefixfile+"_"+curdatalabel+"_Confusion.pdf")
 
-allproba = dict()
-ally = dict()
-allpred = dict()
-alldata = dict()
+if evalmode:
+    print("Plotting ROC/PRC AUC curves.")
+    PEASUtil.plotROC(allproba, ally, allpred, datasetlabels, prefix, outdir+prefixfile+"_ROC.pdf")
+    PEASUtil.plotPRC(allproba, ally, datasetlabels, prefix, outdir+prefixfile+"_PRC.pdf")
 
-trainX = np.zeros((0,1627))
-trainy = np.zeros(0)
-
-trainXtup = ()
-trainytup = ()
-for i in range(0, len(trainfiles)):
-    trainXi, trainyi, _, _,_,freq = PEAS_util.getData(PEAS_util.filterData(pd.read_csv(trainfiles[i], sep="\t"), 0.0), features, classconversion, labelencoders)
-    trainXi = preprocessing.StandardScaler().fit_transform(imputer.fit_transform(trainXi)) #test#
-    idx = list(np.transpose(np.argwhere(freq >= 0.5))[0])
-    trainXi = trainXi[idx,:]
-    trainyi = trainyi[idx]
-    trainXtup = trainXtup+(trainXi,)
-    trainytup = trainytup+(trainyi[np.newaxis],)
-
-
-trainy = np.concatenate((trainytup), axis=1)[0]
-trainX = np.concatenate((trainXtup), axis=0)
-trainXtup = False
-trainytup = False
-
-
-clf.fit(trainX, trainy)
-
-numclasses = len(np.unique(trainy))
-def writepredictions(allpred, allproba, ally, alldata, flabels):
-    for i in range(0, len(flabels)):
-        print(np.shape(alldata[i]))
-        print(np.shape(allpred[i]))
-        print(np.shape(ally[i]))
-        print(np.shape(allproba[i]))
-        pd.DataFrame(np.concatenate((alldata[i],np.transpose(allpred[i][np.newaxis]),np.transpose(ally[i][np.newaxis]), allproba[i]), axis=1)[:,:]).to_csv(outdir+flabels[i]+"_predictions.txt", sep="\t", index=None, header=None)
-
-for i in range(0,len(testfiles)):
-    testX, testy, _, ids,_,freq = PEAS_util.getData(PEAS_util.filterData(pd.read_csv(testfiles[i], sep="\t"), 0.0), features, testclassconversion, labelencoders)
-    testX = preprocessing.StandardScaler().fit_transform(imputer.fit_transform(testX))#test# 
-    testX  = testX[:,:]
-    ctestX = testX
-    allproba[i] = clf.predict_proba(ctestX)
-    allpred[i] = clf.predict(ctestX)
-    ally[i] = testy
-    alldata[i] = ids.loc[:,:]
-PEAS_util.plotMicroROC(allproba, ally, allpred, numclasses,flabels, outdir+"ROC.pdf", "ROC")
-PEAS_util.plotMicroPRC(allproba, ally, numclasses,flabels, outdir+"PRC.pdf", "Precision Recall")
-writepredictions(allpred, allproba, ally, alldata, flabels)
-
-
-for i in range(0, len(allpred)):
-    PEAS_util.plotConfusionMatrix( ally[i], allpred[i], flabels[i], range(0,numclasses),outdir+flabels[i]+"_confusion.pdf")
-    
+print("Complete.")

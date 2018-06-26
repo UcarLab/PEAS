@@ -643,7 +643,7 @@ public class PEASUserInterface {
 				String[] cmd = new String[0];
 				Function postfunction = null;
 				
-				ModelPredictorValidator emv = new ModelPredictorValidator(_pythoncmd, _path, _enhancerfeaturefile.getText(), outdirfield.getText(), emfield.getText(), _ptm.getFeatureIndexFileField(), _ptm.getLabelEncoderField(), _eclassfield.getText(), evalbox.isSelected(), "enhancer");
+				ModelPredictorValidator emv = new ModelPredictorValidator(_pythoncmd, _path, _enhancerfeaturefile.getText(), outdirfield.getText(), emfield.getText(), _etm.getFeatureIndexFileField(), _etm.getLabelEncoderField(), _eclassfield.getText(), evalbox.isSelected(), "enhancer");
 				error = emv.hasError();
 				errormessages = emv.getErrorMessage();
 				

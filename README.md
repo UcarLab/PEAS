@@ -7,11 +7,11 @@
 3. SAMTools (https://github.com/samtools/samtools/releases)
 4. MACS2 (https://github.com/taoliu/MACS)
 5. HOMER (http://homer.ucsd.edu/homer/)
-7. Python (https://www.python.org/downloads/) with the following libraries
-..* numpy
-..* pandas
-..* sklearn
-..* matplotlib
+7. Python (https://www.python.org/downloads/) with the following libraries:
+ - numpy
+ - pandas
+ - sklearn
+ - matplotlib
 
 ```sh
 pip install numpy pandas scikit-learn matplotlib

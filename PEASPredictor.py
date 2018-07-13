@@ -21,6 +21,8 @@ parser.add_argument('-c', dest='classes', type=str,
 parser.add_argument('-l', dest='labelencoder', help='File containing feature label transformations into integer representations.', type=str)
 parser.add_argument('-e', dest='evalmode', action='store_true',
                     help='Whether or not to compare predictions with provided class labels.')
+parser.add_argument('-a', dest='annotationdest', type=str,
+                    help='Include an annotation file path prefix to append the feature file with a column for predictions.')
 
 args = parser.parse_args()
 
@@ -33,10 +35,8 @@ featurefilename = os.path.splitext(os.path.basename(args.featurefiles))[0]
 
 if args.prefix is not None:
     prefix = args.prefix
-    prefixfile = args.prefix.replace(" ", "_")
 else:
     prefix = featurefilename
-    prefixfile = featurefilename.replace(" ", "_")
 
 if args.out is not None:
     outdir = PEASUtil.getFormattedDirectory(args.out)
@@ -84,13 +84,19 @@ for i in range(0,len(datasetfiles)):
     allpred.append(clf.predict(testX))
     ally.append(testy)
     alldata.append(data)
-    PEASUtil.writePredictions(outdir+prefixfile+"_"+curdatalabel+"_predictions.txt", allpred[i], allproba[i], ally[i], alldata[i], evalmode)
+    PEASUtil.writePredictions(outdir+prefix+"_"+curdatalabel+"_predictions.txt", allpred[i], allproba[i], ally[i], alldata[i], evalmode)
     if evalmode:
-        PEASUtil.plotConfusionMatrix(testy, allpred[-1], curdatalabel, np.unique(testy), outdir+prefixfile+"_"+curdatalabel+"_Confusion.pdf")
+        PEASUtil.plotConfusionMatrix(testy, allpred[-1], curdatalabel, np.unique(testy), outdir+prefix+"_"+curdatalabel+"_Confusion.pdf")
 
 if evalmode:
     print("Plotting ROC/PRC AUC curves.")
-    PEASUtil.plotROC(allproba, ally, allpred, datasetlabels, prefix, outdir+prefixfile+"_ROC.pdf")
-    PEASUtil.plotPRC(allproba, ally, datasetlabels, prefix, outdir+prefixfile+"_PRC.pdf")
+    PEASUtil.plotROC(allproba, ally, allpred, datasetlabels, prefix, outdir+prefix+"_ROC.pdf")
+    PEASUtil.plotPRC(allproba, ally, datasetlabels, prefix, outdir+prefix+"_PRC.pdf")
+
+if args.annotationdest is not None:
+    print("Writing annotated feature file(s).")
+    for i in range(0,len(datasetfiles)):
+        curdatalabel = datasetlabels[i]
+        PEASUtil.annotateWithPredictions(datasetfiles[i], outdir+prefix+"_"+curdatalabel+"_predictions.txt", args.annotationdest+"_"+curdatalabel+".txt")
 
 print("Complete.")

@@ -14,6 +14,8 @@ parser.add_argument('-c', dest='column', type=int, default=24, help='Index colum
 parser.add_argument('-u', dest='upstreamtss', type=int, default=2000, help='The upstream distance threshold from the TSS. Default: 2000')
 parser.add_argument('-d', dest='downstreamtss', type=int, default=2000, help='The downstream distance threshold from the TSS. Default: 2000')
 parser.add_argument('-t', dest='dest', type=str, help='The promoter prediction file destination.')
+parser.add_argument('-a', dest='annotationdest', type=str,
+                    help='Include an annotation file path destination to append the feature file with a column for predictions.')
 
 args = parser.parse_args()
 
@@ -47,5 +49,11 @@ def getPromoterPredictions(dataset, dtssidx, upthresh, downthresh):
 
 predictions = getPromoterPredictions(inputfile, dtssidx, downthresh, upthresh)
 
+print("Writing prediction file.")
 pd.DataFrame(predictions, columns=["chr", "start", "end", "promoter prediction"]).to_csv(dest, sep="\t", index=None)
+
+if args.annotationdest is not None:
+    print("Writing annotated feature file.")
+    PEASUtil.annotateWithPredictions(args.featurefile, dest, args.annotationdest)
+
 print("Finished annotating promoters.")

@@ -265,6 +265,45 @@ def getData(data, featurecols, labelencoder, classconversion=None):
     
     return features, None, featurelabels, data.iloc[:, 0:3]
 
+def annotateWithPredictions(featurefile, predictionfile, dest):
+    """Generates a receiver operating characteristic
+        curve for the given prediction probabilities.
+        
+        Parameters
+        ----------
+        featurefile : Str
+        File path of the features.
+        
+        predictionfile : Str
+        File path of the predictions.
+        
+        dest : str
+        The destination of the annotated feature file.
+        """
+    features = pd.read_csv(featurefile, sep="\t")
+    headercolumns = list(features.columns)
+    features = features.values
+    predictions = pd.read_csv(predictionfile, sep="\t").values
+
+    predictmap = dict()
+    for i in range(0, len(predictions)):
+        key = predictions[i,0]+":"+str(predictions[i,1])+"-"+str(predictions[i,2])
+        predictmap[key] = predictions[i,3]
+
+    annvect = np.ones((len(features),1))*-1
+    for i in range(0, len(features)):
+        key = features[i,0]+":"+str(features[i,1])+"-"+str(features[i,2])
+        try:
+            annvect[i,0] = predictmap[key]
+        except:
+            pass
+
+    headercolumns.append("Class Annotation")
+    afeatures = np.concatenate((features, annvect.astype(int)), axis=1)
+
+    pd.DataFrame(afeatures,columns=headercolumns).to_csv(dest, sep="\t", index=None)
+
+
 def plotROC(yscore, true, predtrue, datasets, title, outfile):
     """Generates a receiver operating characteristic
         curve for the given prediction probabilities.

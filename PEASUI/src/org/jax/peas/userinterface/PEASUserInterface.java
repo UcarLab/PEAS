@@ -12,7 +12,6 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -22,7 +21,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
@@ -32,14 +30,11 @@ import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jax.peas.userinterface.inputvalidation.AnnotateValidator;
 import org.jax.peas.userinterface.inputvalidation.ExtractFeaturesValidator;
-import org.jax.peas.userinterface.inputvalidation.FeaturePrediction;
 import org.jax.peas.userinterface.inputvalidation.ModelPredictorValidator;
 import org.jax.peas.userinterface.inputvalidation.ModelTrainerValidator;
 import org.jax.peas.userinterface.inputvalidation.TSSPromoterValidator;
@@ -67,7 +62,8 @@ public class PEASUserInterface {
 	private JTextField _pmf;
 	private JTextField _eclassfield;
 	private JTextField _tclassfield;
-	private JTextField _promoterfeaturefile;
+	private JTextField _promoterfeaturefilet;
+	private JTextField _promoterfeaturefilem;
 	private JTextField _enhancerfeaturefile;
 
 	
@@ -113,15 +109,16 @@ public class PEASUserInterface {
 		
 		JPanel featureextpanel = getFeatureExtractionPanel();
 		JPanel featureannpanel = getFeatureAnnotationPanel();
-		JPanel promoterpanel = getPromoterPredictionPanel();
+		JPanel promoterpanelt = getPromoterTSSPanel();
+		JPanel promoterpanelm = getPromoterModelPanel();
 		JPanel enhpanel = getEnhancerPredictionPanel();
 		JPanel trainpanel = getTrainModelPanel();
 		JPanel configpanel = getConfigPanel();
 
-		JPanel mainpanel = getMainPanel(featureextpanel,featureannpanel,promoterpanel, enhpanel, trainpanel, configpanel);
+		JPanel mainpanel = getMainPanel(featureextpanel,featureannpanel,promoterpanelt, promoterpanelm, enhpanel, trainpanel, configpanel);
 
 		_frame.add(mainpanel);
-		_frame.setSize(540,480);
+		_frame.setSize(560,500);
 		_frame.setResizable(false);
 		_frame.setVisible(true);
 		_frame.setTitle("PEAS");
@@ -129,7 +126,7 @@ public class PEASUserInterface {
 	}
 	
 	private JPanel getMainPanel(final JPanel fepanel, final JPanel fapanel,
-			final JPanel ppanel, final JPanel epanel, final JPanel trainpanel, final JPanel configpanel){
+			final JPanel ppanelt, final JPanel ppanelm, final JPanel epanel, final JPanel trainpanel, final JPanel configpanel){
 		JPanel rvpanel = new JPanel();
 		rvpanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
@@ -157,11 +154,11 @@ public class PEASUserInterface {
 		
 		JLabel predl = new JLabel("Enhancer Prediction:");
 		predl.setFont(_labelfont);
-		JLabel efl = new JLabel("Step 1:");
+		JLabel efl = new JLabel("Step 1: Extract Features");
 		efl.setFont(_labelfont);
-		JLabel ppl = new JLabel("Step 2:");
+		JLabel ppl = new JLabel("Step 2: Annotate Promoters");
 		ppl.setFont(_labelfont);
-		JLabel pel = new JLabel("Step 3:");
+		JLabel pel = new JLabel("Step 3: Predict Enhancers");
 		pel.setFont(_labelfont);
 
 		JLabel trainl = new JLabel("Model Training Tools:");
@@ -175,10 +172,15 @@ public class PEASUserInterface {
 		ef.setEnabled(false);
 		ef.setFocusable(false);
 		
-		final JButton pp = new JButton("Predict Promoters");
-		pp.setPreferredSize(new Dimension(width,height));
-		pp.setMaximumSize(new Dimension(width,height));
-		pp.setFocusable(false);
+		final JButton ppt = new JButton("Using TSS");
+		ppt.setPreferredSize(new Dimension(width,height));
+		ppt.setMaximumSize(new Dimension(width,height));
+		ppt.setFocusable(false);
+		
+		final JButton ppm = new JButton("Using Neural Network");
+		ppm.setPreferredSize(new Dimension(width,height));
+		ppm.setMaximumSize(new Dimension(width,height));
+		ppm.setFocusable(false);
 		
 		final JButton pe = new JButton("Predict Enhancers");
 		pe.setPreferredSize(new Dimension(width,height));
@@ -196,7 +198,8 @@ public class PEASUserInterface {
 		tm.setMaximumSize(new Dimension(width,height));
 		tm.setFocusable(false);
 		
-		
+		JLabel configl = new JLabel("PEAS Configuration:");
+		configl.setFont(_labelfont);
 		final JButton config = new JButton("Configure");
 		config.setPreferredSize(new Dimension(width,height));
 		config.setMaximumSize(new Dimension(width,height));
@@ -207,14 +210,16 @@ public class PEASUserInterface {
 			public void actionPerformed(ActionEvent e) {
 				ef.setEnabled(false);
 				af.setEnabled(true);
-				pp.setEnabled(true);
+				ppt.setEnabled(true);
+				ppm.setEnabled(true);
 				pe.setEnabled(true);
 				tm.setEnabled(true);
 				config.setEnabled(true);
 				
 				rightpanel.remove(fepanel);
 				rightpanel.remove(fapanel);
-				rightpanel.remove(ppanel);
+				rightpanel.remove(ppanelt);
+				rightpanel.remove(ppanelm);
 				rightpanel.remove(epanel);
 				rightpanel.remove(trainpanel);
 				rightpanel.remove(configpanel);
@@ -231,14 +236,16 @@ public class PEASUserInterface {
 			public void actionPerformed(ActionEvent e) {
 				ef.setEnabled(true);
 				af.setEnabled(false);
-				pp.setEnabled(true);
+				ppt.setEnabled(true);
+				ppm.setEnabled(true);
 				pe.setEnabled(true);
 				tm.setEnabled(true);
 				config.setEnabled(true);
 				
 				rightpanel.remove(fepanel);
 				rightpanel.remove(fapanel);
-				rightpanel.remove(ppanel);
+				rightpanel.remove(ppanelt);
+				rightpanel.remove(ppanelm);
 				rightpanel.remove(epanel);
 				rightpanel.remove(trainpanel);
 				rightpanel.remove(configpanel);
@@ -250,23 +257,52 @@ public class PEASUserInterface {
 			}
 		});
 		
-		pp.addActionListener(new ActionListener(){
+		ppt.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				ef.setEnabled(true);
 				af.setEnabled(true);
-				pp.setEnabled(false);
+				ppt.setEnabled(false);
+				ppm.setEnabled(true);
 				pe.setEnabled(true);
 				tm.setEnabled(true);
 				config.setEnabled(true);
 				
 				rightpanel.remove(fepanel);
 				rightpanel.remove(fapanel);
-				rightpanel.remove(ppanel);
+				rightpanel.remove(ppanelt);
+				rightpanel.remove(ppanelm);
 				rightpanel.remove(epanel);
 				rightpanel.remove(trainpanel);
 				rightpanel.remove(configpanel);
-				rightpanel.add(ppanel);
+				rightpanel.add(ppanelt);
+				
+				_frame.revalidate();
+				_frame.repaint();
+
+
+			}
+		});
+		
+		ppm.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ef.setEnabled(true);
+				af.setEnabled(true);
+				ppt.setEnabled(true);
+				ppm.setEnabled(false);
+				pe.setEnabled(true);
+				tm.setEnabled(true);
+				config.setEnabled(true);
+				
+				rightpanel.remove(fepanel);
+				rightpanel.remove(fapanel);
+				rightpanel.remove(ppanelt);
+				rightpanel.remove(ppanelm);
+				rightpanel.remove(epanel);
+				rightpanel.remove(trainpanel);
+				rightpanel.remove(configpanel);
+				rightpanel.add(ppanelm);
 				
 				_frame.revalidate();
 				_frame.repaint();
@@ -280,14 +316,16 @@ public class PEASUserInterface {
 			public void actionPerformed(ActionEvent e) {
 				ef.setEnabled(true);
 				af.setEnabled(true);
-				pp.setEnabled(true);
+				ppt.setEnabled(true);
+				ppm.setEnabled(true);
 				pe.setEnabled(false);
 				tm.setEnabled(true);
 				config.setEnabled(true);
 				
 				rightpanel.remove(fepanel);
 				rightpanel.remove(fapanel);
-				rightpanel.remove(ppanel);
+				rightpanel.remove(ppanelt);
+				rightpanel.remove(ppanelm);
 				rightpanel.remove(epanel);
 				rightpanel.remove(trainpanel);
 				rightpanel.remove(configpanel);
@@ -305,14 +343,16 @@ public class PEASUserInterface {
 			public void actionPerformed(ActionEvent e) {
 				ef.setEnabled(true);
 				af.setEnabled(true);
-				pp.setEnabled(true);
+				ppt.setEnabled(true);
+				ppm.setEnabled(true);
 				pe.setEnabled(true);
 				tm.setEnabled(false);
 				config.setEnabled(true);
 				
 				rightpanel.remove(fepanel);
 				rightpanel.remove(fapanel);
-				rightpanel.remove(ppanel);
+				rightpanel.remove(ppanelt);
+				rightpanel.remove(ppanelm);
 				rightpanel.remove(epanel);
 				rightpanel.remove(trainpanel);
 				rightpanel.remove(configpanel);
@@ -328,14 +368,16 @@ public class PEASUserInterface {
 			public void actionPerformed(ActionEvent e) {
 				ef.setEnabled(true);
 				af.setEnabled(true);
-				pp.setEnabled(true);
+				ppt.setEnabled(true);
+				ppm.setEnabled(true);
 				pe.setEnabled(true);
 				tm.setEnabled(true);
 				config.setEnabled(false);
 				
 				rightpanel.remove(fepanel);
 				rightpanel.remove(fapanel);
-				rightpanel.remove(ppanel);
+				rightpanel.remove(ppanelt);
+				rightpanel.remove(ppanelm);
 				rightpanel.remove(epanel);
 				rightpanel.remove(trainpanel);
 				rightpanel.remove(configpanel);
@@ -354,7 +396,8 @@ public class PEASUserInterface {
 		leftpanel.add(efl);
 		leftpanel.add(ef);
 		leftpanel.add(ppl);
-		leftpanel.add(pp);
+		leftpanel.add(ppt);
+		leftpanel.add(ppm);
 		leftpanel.add(pel);
 		leftpanel.add(pe);
 		
@@ -367,66 +410,28 @@ public class PEASUserInterface {
 		JSeparator js2 = new JSeparator(JSeparator.HORIZONTAL);
 		js.setMaximumSize(new Dimension(1000, 15));
 		leftpanel.add(js2);
+		leftpanel.add(configl);
 		leftpanel.add(config);
 		
 		return rvpanel;
 	}
 	
-	private JPanel getPromoterPredictionPanel(){
+	private JPanel getPromoterTSSPanel(){
 		final JPanel comp = new JPanel();
 		comp.setLayout(new BoxLayout(comp, BoxLayout.PAGE_AXIS));
 		comp.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		
-		_promoterfeaturefile = new JTextField();
-		_util.setFieldPanel(comp, _fc, new JLabel("Feature File:"), _promoterfeaturefile, new JButton("..."), _featurefilter, false);
-		
-		
-		final JRadioButton modelrb = new JRadioButton();
-		final JRadioButton tssrb = new JRadioButton();
-		
-		JPanel modelrbp = new JPanel(new BorderLayout());
-		modelrbp.add(modelrb, BorderLayout.NORTH);
-		JPanel tssrbp = new JPanel(new BorderLayout());
-		tssrbp.add(tssrb, BorderLayout.NORTH);
-
-		ButtonGroup bg = new ButtonGroup();
-		bg.add(modelrb);
-		bg.add(tssrb);
-		
-		JPanel modelpanel = new JPanel();
-		modelpanel.setLayout(new BorderLayout());
-		modelpanel.add(modelrbp, BorderLayout.WEST);
-		modelpanel.setAlignmentY(Component.TOP_ALIGNMENT);
-		
-		JPanel mpoptions = new JPanel();
-		mpoptions.setLayout(new BorderLayout());
-		JLabel ml = new JLabel("Predict promoters using ML model");
-		ml.setFont(_labelfont);
-		ml.setHorizontalAlignment(JLabel.LEFT);
-		mpoptions.add(ml, BorderLayout.NORTH);
-		final JTextField pmfield = _pmf;
-		pmfield.setColumns(12);
-		final JButton pmbutton =  new JButton("...");
-		_util.setFieldPanel(mpoptions, _fc, new JLabel("Promoter Model:"), pmfield, pmbutton, _modelfilter, false);
-		final TrainModelOptions tm = _ptm;
-		mpoptions.add(tm, BorderLayout.SOUTH);
-		modelpanel.add(mpoptions, BorderLayout.CENTER);
-
-		
+		_promoterfeaturefilet = new JTextField();
+		_util.setFieldPanel(comp, _fc, new JLabel("Feature File:"), _promoterfeaturefilet, new JButton("..."), _featurefilter, false);
 		
 		JPanel tsspanel = new JPanel();
 		tsspanel.setLayout(new BorderLayout());
-		tsspanel.add(tssrbp, BorderLayout.WEST);
 		tsspanel.setAlignmentY(Component.TOP_ALIGNMENT);
 		
 		JPanel tssoptions = new JPanel();
 		tssoptions.setLayout(new BorderLayout());
-		JLabel tssl = new JLabel("Predict promoters using distance to TSS");
-		tssl.setFont(_labelfont);
-		tssl.setHorizontalAlignment(JLabel.LEFT);
-		tssoptions.add(tssl, BorderLayout.NORTH);
 		
-		final JTextField tsscolumn = new JTextField("24");
+		final JTextField tsscolumn = new JTextField("22");
 		tsscolumn.setColumns(3);
 		final JTextField upfield = new JTextField("2000");
 		upfield.setColumns(6);
@@ -440,29 +445,10 @@ public class PEASUserInterface {
 		tsspanel.add(tssoptions, BorderLayout.CENTER);
 		
 		
-		ChangeListener cl = new ChangeListener(){
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				boolean ms = modelrb.isSelected();
-				boolean ts = tssrb.isSelected();
-				pmfield.setEnabled(ms);
-				pmbutton.setEnabled(ms);
-				tm.setEnabled(ms);
-				upfield.setEnabled(ts);
-				downfield.setEnabled(ts);
-				tsscolumn.setEnabled(ts);
-			}
-		};
-		modelrb.setSelected(true);
-		cl.stateChanged(null);
-		modelrb.addChangeListener(cl);
-		tssrb.addChangeListener(cl);
-		
 		JPanel combinedpanel = new JPanel();
 		combinedpanel.setLayout(new BoxLayout(combinedpanel, BoxLayout.Y_AXIS));
 		final JTextField outdirfield = new JTextField();
 		_util.setFieldPanel(combinedpanel, _fc, new JLabel("Output Directory:"), outdirfield, new JButton("..."), null, true);
-		combinedpanel.add(modelpanel);
 		combinedpanel.add(tsspanel);
 		MoreOptionsPanel motm = new MoreOptionsPanel(combinedpanel); 
 		comp.add(motm);
@@ -476,31 +462,23 @@ public class PEASUserInterface {
 				String command = "";
 				boolean error = false;
 				String errormessages = "";
-				if(modelrb.isSelected()){
-					ModelPredictorValidator pmv = new ModelPredictorValidator(_pythoncmd, _path, _promoterfeaturefile.getText(), outdirfield.getText(), pmfield.getText(), _ptm.getFeatureIndexFileField(), _ptm.getLabelEncoderField(), "", false, "promoter");
-					error = pmv.hasError();
-					errormessages = pmv.getErrorMessage();
-					command = pmv.getCommand();
-				}
-				else if(tssrb.isSelected()){
-					TSSPromoterValidator tsspv = new TSSPromoterValidator(_pythoncmd, _path, _promoterfeaturefile.getText(), outdirfield.getText(), tsscolumn.getText(), upfield.getText(), downfield.getText());
-					error = tsspv.hasError();
-					errormessages = tsspv.getErrorMessage();
-					command = tsspv.getCommand();
-				}
+				TSSPromoterValidator tsspv = new TSSPromoterValidator(_pythoncmd, _path, _promoterfeaturefilet.getText(), outdirfield.getText(), tsscolumn.getText(), upfield.getText(), downfield.getText());
+				error = tsspv.hasError();
+				errormessages = tsspv.getErrorMessage();
+				command = tsspv.getCommand();
 				
 				if(error){
 					JOptionPane.showMessageDialog(_frame, errormessages.toString(),"Input Error",JOptionPane.ERROR_MESSAGE);
 				}
 				else{
-					JOptionPane.showMessageDialog(_frame, new CommandPanel(_labelfont, command),"Predict Promoter Command",JOptionPane.PLAIN_MESSAGE);
+					JOptionPane.showMessageDialog(_frame, new CommandPanel(_labelfont, command),"Annotate Promoter Command",JOptionPane.PLAIN_MESSAGE);
 				}
 			}
 			
 		});
 		
 		
-		JButton ppb = new JButton("Predict Promoters");
+		JButton ppb = new JButton("Annotate Promoters");
 		
 		final CommandRunner ppcr = new CommandRunner(_frame, _labelfont, "Promoter Prediction");
 		
@@ -514,38 +492,13 @@ public class PEASUserInterface {
 				Function postfunction = null;
 				String predictionfile = "";
 				
-				if(modelrb.isSelected()){
-					ModelPredictorValidator pmv = new ModelPredictorValidator(_pythoncmd, _path, _promoterfeaturefile.getText(), outdirfield.getText(), pmfield.getText(), _ptm.getFeatureIndexFileField(), _ptm.getLabelEncoderField(), "", false, "promoter");
-					error = pmv.hasError();
-					errormessages = pmv.getErrorMessage();
-					
-					if(!error){
-						cmd = pmv.getCommandArray();
-						FeaturePrediction[] fp = pmv.getFeaturePredictions();
-						PredictionAnnotator[] pa = new PredictionAnnotator[fp.length];
-						for(int i = 0; i < fp.length; i++){
-							pa[i] = new PredictionAnnotator(_pythoncmd, _path,fp[i].getFeatureFile(), fp[i].getPredictionFile());
-						}
-						
-						postfunction = new MultiPredictionAnnotator(pa);
-						predictionfile = ((MultiPredictionAnnotator)postfunction).getPredictionFile(pmv.getOutputDirectory(), "promoter");
-					}
-				}
-				else if(tssrb.isSelected()){
-					TSSPromoterValidator tsspv = new TSSPromoterValidator(_pythoncmd, _path, _promoterfeaturefile.getText(), outdirfield.getText(), tsscolumn.getText(), upfield.getText(), downfield.getText());
-					error = tsspv.hasError();
-					errormessages = tsspv.getErrorMessage();
-					cmd = tsspv.getCommandArray();
-					
-					if(!error){
-						PredictionAnnotator[] pa = new PredictionAnnotator[1];
-						pa[0] = new PredictionAnnotator(_pythoncmd, _path, _promoterfeaturefile.getText(), tsspv.getPredictionFile());
-						
-						postfunction = new MultiPredictionAnnotator(pa);
-						predictionfile = ((MultiPredictionAnnotator)postfunction).getPredictionFile(tsspv.getOutputDirectory(), "promoter");
-					}
-					
-				}
+
+				TSSPromoterValidator tsspv = new TSSPromoterValidator(_pythoncmd, _path, _promoterfeaturefilet.getText(), outdirfield.getText(), tsscolumn.getText(), upfield.getText(), downfield.getText());
+				error = tsspv.hasError();
+				errormessages = tsspv.getErrorMessage();
+				cmd = tsspv.getCommandArray();
+				
+				postfunction = new AnnotationInformer(new String[]{tsspv.getAnnotationFile()});
 				
 				if(error){
 					JOptionPane.showMessageDialog(_frame, errormessages.toString(),"Input Error",JOptionPane.ERROR_MESSAGE);
@@ -563,6 +516,103 @@ public class PEASUserInterface {
 		return comp;
 	}
 	
+	private JPanel getPromoterModelPanel(){
+		final JPanel comp = new JPanel();
+		comp.setLayout(new BoxLayout(comp, BoxLayout.PAGE_AXIS));
+		comp.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+		
+		_promoterfeaturefilem = new JTextField();
+		_util.setFieldPanel(comp, _fc, new JLabel("Feature File:"), _promoterfeaturefilem, new JButton("..."), _featurefilter, false);
+		
+		
+		JPanel modelpanel = new JPanel();
+		modelpanel.setLayout(new BorderLayout());
+		modelpanel.setAlignmentY(Component.TOP_ALIGNMENT);
+		
+		JPanel mpoptions = new JPanel();
+		mpoptions.setLayout(new BorderLayout());
+		final JTextField pmfield = _pmf;
+		pmfield.setColumns(12);
+		final JButton pmbutton =  new JButton("...");
+		_util.setFieldPanel(mpoptions, _fc, new JLabel("Promoter Model:"), pmfield, pmbutton, _modelfilter, false);
+		final TrainModelOptions tm = _ptm;
+		mpoptions.add(tm, BorderLayout.SOUTH);
+		modelpanel.add(mpoptions, BorderLayout.CENTER);
+
+			
+		
+		JPanel combinedpanel = new JPanel();
+		combinedpanel.setLayout(new BoxLayout(combinedpanel, BoxLayout.Y_AXIS));
+		final JTextField outdirfield = new JTextField();
+		_util.setFieldPanel(combinedpanel, _fc, new JLabel("Output Directory:"), outdirfield, new JButton("..."), null, true);
+		combinedpanel.add(modelpanel);
+		MoreOptionsPanel motm = new MoreOptionsPanel(combinedpanel); 
+		comp.add(motm);
+		
+		
+		JButton cmdb = new JButton("Get Command");
+		cmdb.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String command = "";
+				boolean error = false;
+				String errormessages = "";
+				ModelPredictorValidator pmv = new ModelPredictorValidator(_pythoncmd, _path, _promoterfeaturefilem.getText(), outdirfield.getText(), pmfield.getText(), _ptm.getFeatureIndexFileField(), _ptm.getLabelEncoderField(), "", false, "promoter", "promoter");
+				error = pmv.hasError();
+				errormessages = pmv.getErrorMessage();
+				command = pmv.getCommand();
+				if(error){
+					JOptionPane.showMessageDialog(_frame, errormessages.toString(),"Input Error",JOptionPane.ERROR_MESSAGE);
+				}
+				else{
+					JOptionPane.showMessageDialog(_frame, new CommandPanel(_labelfont, command),"Annotate Promoter Command",JOptionPane.PLAIN_MESSAGE);
+				}
+			}
+			
+		});
+		
+		
+		JButton ppb = new JButton("Annotate Promoters");
+		
+		final CommandRunner ppcr = new CommandRunner(_frame, _labelfont, "Promoter Prediction");
+		
+		ppb.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				boolean error = false;
+				String errormessages = "";
+				String[] cmd = new String[0];
+				Function postfunction = null;
+				String predictionfile = "";
+				
+				ModelPredictorValidator pmv = new ModelPredictorValidator(_pythoncmd, _path, _promoterfeaturefilem.getText(), outdirfield.getText(), pmfield.getText(), _ptm.getFeatureIndexFileField(), _ptm.getLabelEncoderField(), "", false, "promoter", "promoter");
+				error = pmv.hasError();
+				errormessages = pmv.getErrorMessage();
+				
+				if(!error){
+					cmd = pmv.getCommandArray();
+					String[] afiles = pmv.getAnnotationFiles();
+					postfunction = new PredictionInformer(afiles);
+					predictionfile = afiles[0];
+				}
+				
+				if(error){
+					JOptionPane.showMessageDialog(_frame, errormessages.toString(),"Input Error",JOptionPane.ERROR_MESSAGE);
+				}
+				else{
+					ppcr.setPostCommandFunction(postfunction);
+					ppcr.run(cmd);
+					_enhancerfeaturefile.setText(predictionfile);
+				}
+
+			}
+			
+		});
+		comp.add(_util.getHorizontalField(cmdb, ppb));
+		return comp;
+	}
 	
 	
 	private JPanel getEnhancerPredictionPanel(){
@@ -613,7 +663,7 @@ public class PEASUserInterface {
 				String command = "";
 				boolean error = false;
 				String errormessages = "";
-				ModelPredictorValidator pmv = new ModelPredictorValidator(_pythoncmd, _path, _enhancerfeaturefile.getText(), outdirfield.getText(), emfield.getText(), _ptm.getFeatureIndexFileField(), _ptm.getLabelEncoderField(), _eclassfield.getText(), evalbox.isSelected(), "enhancer");
+				ModelPredictorValidator pmv = new ModelPredictorValidator(_pythoncmd, _path, _enhancerfeaturefile.getText(), outdirfield.getText(), emfield.getText(), _etm.getFeatureIndexFileField(), _etm.getLabelEncoderField(), _eclassfield.getText(), evalbox.isSelected(), "enhancer", null);
 				error = pmv.hasError();
 				errormessages = pmv.getErrorMessage();
 				command = pmv.getCommand();
@@ -643,18 +693,13 @@ public class PEASUserInterface {
 				String[] cmd = new String[0];
 				Function postfunction = null;
 				
-				ModelPredictorValidator emv = new ModelPredictorValidator(_pythoncmd, _path, _enhancerfeaturefile.getText(), outdirfield.getText(), emfield.getText(), _etm.getFeatureIndexFileField(), _etm.getLabelEncoderField(), _eclassfield.getText(), evalbox.isSelected(), "enhancer");
+				ModelPredictorValidator emv = new ModelPredictorValidator(_pythoncmd, _path, _enhancerfeaturefile.getText(), outdirfield.getText(), emfield.getText(), _etm.getFeatureIndexFileField(), _etm.getLabelEncoderField(), _eclassfield.getText(), evalbox.isSelected(), "enhancer", null);
 				error = emv.hasError();
 				errormessages = emv.getErrorMessage();
 				
 				if(!error){
 					cmd = emv.getCommandArray();
-					FeaturePrediction[] fp = emv.getFeaturePredictions();
-					PredictionAnnotator[] pa = new PredictionAnnotator[fp.length];
-					for(int i = 0; i < fp.length; i++){
-						pa[i] = new PredictionAnnotator(_pythoncmd, _path,fp[i].getFeatureFile(), fp[i].getPredictionFile());
-					}
-					postfunction = new PredictionInformer(emv.getFeaturePredictions());
+					postfunction = new PredictionInformer(emv.getFeaturePredictionsFiles());
 				}
 				
 				if(error){
@@ -725,7 +770,7 @@ public class PEASUserInterface {
 				error = av.hasError();
 				errormessages = av.getErrorMessage();
 				cmd = av.getCommandArray();
-				postfunction = new AnnotationInformer(av.getOutputFile());
+				postfunction = new AnnotationInformer(new String[]{av.getOutputFile()});
 				
 				if(error){
 					JOptionPane.showMessageDialog(_frame, errormessages.toString(),"Input Error",JOptionPane.ERROR_MESSAGE);
@@ -829,7 +874,8 @@ public class PEASUserInterface {
 				}
 				else{
 					efcr.run(efv.getCommandArray());
-					_promoterfeaturefile.setText(efv.getFeatureFile());
+					_promoterfeaturefilet.setText(efv.getFeatureFile());
+					_promoterfeaturefilem.setText(efv.getFeatureFile());
 				}
 
 			}

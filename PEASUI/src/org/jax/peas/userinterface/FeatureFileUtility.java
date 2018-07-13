@@ -52,22 +52,22 @@ public class FeatureFileUtility {
 		return l;
 	}
 	
-	public static ListFile[] reformatFeatureFile(String featurefile, String namesuffix, String filesuffix) throws FileNotFoundException{
+	public static ListFile[] reformatFeatureFile(String featurefile, String dest) throws FileNotFoundException{
 		if((new File(featurefile)).exists()){
 			LinkedList<ListFile> rv = new LinkedList<ListFile>();
 			BufferedReader br = null;
 			BufferedWriter bw = null;
 			try {
 				br = new BufferedReader(new FileReader(featurefile));
-				bw = new BufferedWriter(new FileWriter(featurefile+filesuffix));
+				bw = new BufferedWriter(new FileWriter(dest));
 				
 				while(br.ready()){
 					String line = br.readLine();
 					String[] split = line.split("\t");
-					String name = split[0].replace(" ", "_")+(namesuffix.equals("")? "" : "_"+namesuffix);
+					String name = split[0].replace(" ", "_");
 					String path = split[1];
 					rv.add(new ListFile(name, path));
-					bw.write(name+"\t"+path);
+					bw.write(name+"\t"+path+"\n");
 				}
 				
 			} catch (IOException e) {

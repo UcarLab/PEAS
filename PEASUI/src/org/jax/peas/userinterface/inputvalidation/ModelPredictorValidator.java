@@ -14,6 +14,8 @@ public class ModelPredictorValidator implements InputValidator{
 	private String _path;
 	private String _featurefile;
 	private String _outdir;
+	private String _tempdir;
+	private String _destdir;
 	private String _model;
 	private String _featureindices;
 	private String _labelencoder;
@@ -22,13 +24,17 @@ public class ModelPredictorValidator implements InputValidator{
 	private boolean _evaluation;
 	private boolean _haserror;
 	private String _errormessage;
+	private String _aprefix = "";
+	private String[] _afiles = new String[0];
+	private String _prefix = null;
 
 	
-	public ModelPredictorValidator(String python, String path,String features, String outdir, String model, String featureindices, String labelencoder, String classes, boolean eval, String id){
+	public ModelPredictorValidator(String python, String path,String features, String outdir, String model, String featureindices, String labelencoder, String classes, boolean eval, String id, String aprefix){
 		_python = python.trim();
 		_path = path.trim();
+		_tempdir = _path+"/temp/";
+
 		_haserror = false;
-		
 		_evaluation = eval;
 		
 		StringBuilder errormessages = new StringBuilder();
@@ -38,42 +44,6 @@ public class ModelPredictorValidator implements InputValidator{
 			_haserror = true;
 			errormessages.append("Feature file does not exist.\n");
 		}
-		else{
-			if(FeatureFileUtility.isMultiFeature(_featurefile)){
-				try {
-					ListFile[] files = FeatureFileUtility.reformatFeatureFile(_featurefile, id, ".reformatted.txt");
-					String filepathprefix = _featurefile+".reformatted";
-					_featurefile = _featurefile+".reformatted.txt";
-					_featurepredictions = new FeaturePrediction[files.length];
-					for(int i = 0; i < files.length; i++){
-						String featurename = files[i].toString();
-						_featurepredictions[i] = new FeaturePrediction(files[i].getPath(), filepathprefix+"_"+featurename+"_predictions.txt");
-					}
-				} catch (FileNotFoundException e) {
-					_haserror = true;
-					errormessages.append("Error reading multi-feature file.\n");
-				}
-			}
-			else{
-				String p  =_featurefile;
-				int slashidx = p.lastIndexOf("/")+1;
-				String ffoutdir = p.substring(0, slashidx);
-				String ffname = p.substring(slashidx);
-				List<ListFile> fflist = new LinkedList<ListFile>();
-				fflist.add(new ListFile(id, _featurefile));
-				_featurefile = FeatureFileUtility.writeFeatureFile(fflist, ffname+".list", "", ffoutdir);
-				
-				String prefix = _featurefile.substring(0,_featurefile.lastIndexOf("."));
-				_featurepredictions = new FeaturePrediction[1];
-				_featurepredictions[0] = new FeaturePrediction(p, prefix+"_"+id+"_predictions.txt");;
-				
-				if(!(new File(_featurefile)).exists()){
-					_haserror = true;
-					errormessages.append("Error creating feature file list.\n");
-				}
-			}
-		}
-
 		
 		_outdir = outdir.trim();
 		File fff = new File(_featurefile);
@@ -89,13 +59,66 @@ public class ModelPredictorValidator implements InputValidator{
 			_outdir = _outdir+"/";
 		}
 		
+		_destdir = _outdir;
+		if(aprefix != null && !aprefix.equals("")){
+			_aprefix = _outdir+aprefix;
+			_destdir = _tempdir;
+		}
+		
+
+		if(!_haserror){
+			if(FeatureFileUtility.isMultiFeature(_featurefile)){
+				try {
+					String p  =_featurefile;
+					int slashidx = p.lastIndexOf("/")+1;
+					String ffname = p.substring(slashidx);
+					_prefix = ffname.substring(0, ffname.lastIndexOf("."));
+					String dest = _tempdir+ffname+".reformatted.txt";
+					ListFile[] files = FeatureFileUtility.reformatFeatureFile(_featurefile, dest);
+					_afiles = new String[files.length];
+					_featurefile = dest;
+					_featurepredictions = new FeaturePrediction[files.length];
+					for(int i = 0; i < files.length; i++){
+						String featurename = files[i].toString();
+						_featurepredictions[i] = new FeaturePrediction(files[i].getPath(), _destdir+_prefix+"_"+featurename+"_predictions.txt");
+						_afiles[i] = _aprefix+"_"+featurename+".txt";
+					}
+				} catch (FileNotFoundException e) {
+					_haserror = true;
+					errormessages.append("Error reading multi-feature file.\n");
+				}
+			}
+			else{
+				String p  =_featurefile;
+				int slashidx = p.lastIndexOf("/")+1;
+				String ffname = p.substring(slashidx);
+				List<ListFile> fflist = new LinkedList<ListFile>();
+				String suffix = ffname.substring(0, ffname.lastIndexOf("."));
+				fflist.add(new ListFile(suffix, _featurefile));
+				_featurefile = FeatureFileUtility.writeFeatureFile(fflist, ffname+".list", "", _tempdir);
+				_afiles = new String[1];
+				
+				_afiles[0] = _aprefix+"_"+suffix+".txt";
+				_prefix = id;
+				_featurepredictions = new FeaturePrediction[1];
+				_featurepredictions[0] = new FeaturePrediction(p, _destdir+id+"_"+suffix+"_predictions.txt");;
+				
+				if(!(new File(_featurefile)).exists()){
+					_haserror = true;
+					errormessages.append("Error creating feature file list.\n");
+				}
+			}
+		}
+
+		
+
+		
 		_model = model.trim();
 		if(_model.equals("") || !(new File(_model)).exists()){
 			_haserror = true;
 			errormessages.append("Model file does not exist.\n");
 		}
 
-		
 		_featureindices = featureindices.trim();
 		if(_featureindices.equals("") || !(new File(_featureindices)).exists()){
 			_haserror = true;
@@ -115,6 +138,10 @@ public class ModelPredictorValidator implements InputValidator{
 		}
 		
 		_errormessage = errormessages.toString();
+	}
+	
+	public String[] getAnnotationFiles(){
+		return _afiles;
 	}
 	
 	public FeaturePrediction[] getFeaturePredictions(){
@@ -140,7 +167,11 @@ public class ModelPredictorValidator implements InputValidator{
 		sb.append(_path);
 		sb.append("PEASPredictor.py");
 		sb.append(" -o ");
-		sb.append(_outdir);
+		sb.append(_destdir);
+		if(_prefix != null && !_prefix.equals("")){
+			sb.append(" -p ");
+			sb.append(_prefix);
+		}
 		sb.append(" -f ");
 		sb.append("\""+_featureindices+"\"");
 		sb.append(" -l ");
@@ -149,9 +180,16 @@ public class ModelPredictorValidator implements InputValidator{
 			sb.append(" -c ");
 			sb.append("\""+_classes+"\"");
 		}
+		
+		if(!_aprefix.equals("")){
+			sb.append(" -a ");
+			sb.append("\""+_aprefix+"\"");
+		}
+		
 		if(_evaluation){
 			sb.append(" -e ");
 		}
+
 		sb.append(" ");
 		sb.append("\""+_model+"\"");
 		sb.append(" ");
@@ -168,6 +206,14 @@ public class ModelPredictorValidator implements InputValidator{
 
 	public String getOutputDirectory() {
 		return _outdir;
+	}
+
+	public String[] getFeaturePredictionsFiles() {
+		String[] rv = new String[_featurepredictions.length];
+		for(int i = 0; i < rv.length; i++){
+			rv[i] = _featurepredictions[i].getPredictionFile();
+		}
+		return rv;
 	}
 	
 

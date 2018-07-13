@@ -16,6 +16,7 @@ public class ModelTrainerValidator implements InputValidator{
 	private String _modelname;
 	private String _featurefile;
 	private String _outdir;
+	private String _tempdir;
 	private String _modelparameters;
 	private String _featureindices;
 	private String _classes;
@@ -28,6 +29,8 @@ public class ModelTrainerValidator implements InputValidator{
 	public ModelTrainerValidator(String python, String path, String modelname, ListFile[] featurefiles, String outdir, String modelparameters, String featureindices, String classes, String labelencoder, String randomstate){
 		_python = python.trim();
 		_path = path.trim();
+		_tempdir = _path+"/temp/";
+
 		_haserror = false;
 		StringBuilder errormessages = new StringBuilder();
 		
@@ -94,7 +97,7 @@ public class ModelTrainerValidator implements InputValidator{
 					String next = it.next();
 					l.add(new ListFile(FeatureFileUtility.getFileName(next), next));
 				}
-				_featurefile = FeatureFileUtility.writeFeatureFile(l, modelname, "", _outdir);
+				_featurefile = FeatureFileUtility.writeFeatureFile(l, modelname, "", _tempdir);
 				if(!(new File(_featurefile)).exists()){
 					_haserror = true;
 					errormessages.append("Error writing file: "+_featurefile);

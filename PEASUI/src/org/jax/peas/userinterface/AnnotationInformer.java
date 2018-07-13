@@ -4,9 +4,9 @@ import java.io.IOException;
 
 public class AnnotationInformer implements Function {
 
-	private String _fp;
+	private String[] _fp;
 	
-	public AnnotationInformer(String fp){
+	public AnnotationInformer(String[] fp){
 		_fp = fp;
 	}
 	
@@ -15,7 +15,9 @@ public class AnnotationInformer implements Function {
 	public String run() throws IOException {
 		StringBuilder rvsb = new StringBuilder();
 		rvsb.append("Annotated features can be located at the following location: \n");
-			rvsb.append(_fp+"\n");
+		for(int i = 0; i < _fp.length; i++){
+			rvsb.append(_fp[i]+"\n");
+		}
 
 		return rvsb.toString();
 	}

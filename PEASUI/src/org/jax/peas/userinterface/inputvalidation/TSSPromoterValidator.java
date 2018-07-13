@@ -8,10 +8,12 @@ public class TSSPromoterValidator implements InputValidator {
 	private String _path;
 	private String _featurefile;
 	private String _outdir;
+	private String _tempdir;
 	private int _tsscol;
 	private int _up;
 	private int _down;
 	private String _dest;
+	private String _adest;
 	
 	private boolean _haserror;
 	private String _errormessage;
@@ -20,6 +22,8 @@ public class TSSPromoterValidator implements InputValidator {
 	public TSSPromoterValidator(String python, String path, String features, String outdir, String tsscol, String upstream, String downstream){
 		_python = python.trim();
 		_path = path.trim();
+		_tempdir = _path+"/temp/";
+
 		_haserror = false;
 		StringBuilder errormessages = new StringBuilder();
 		
@@ -71,7 +75,8 @@ public class TSSPromoterValidator implements InputValidator {
 		}
 
 		String ffname = new File(_featurefile).getName();
-		_dest = _outdir+ffname+".promoterpredictions.txt";
+		_dest = _tempdir+ffname+".promoterpredictions.txt";
+		_adest = _outdir+ffname+".promoterannotated.txt";
 
 		_errormessage = errormessages.toString();
 	}
@@ -82,6 +87,10 @@ public class TSSPromoterValidator implements InputValidator {
 	
 	public String getPredictionFile(){
 		return _dest;
+	}
+	
+	public String getAnnotationFile(){
+		return _adest;
 	}
 	
 	@Override
@@ -109,6 +118,8 @@ public class TSSPromoterValidator implements InputValidator {
 		sb.append(_down);
 		sb.append(" -t ");
 		sb.append("\""+_dest+"\"");
+		sb.append(" -a ");
+		sb.append("\""+_adest+"\"");
 		sb.append(" ");
 		sb.append("\""+_featurefile+"\"");
 		return sb.toString();

@@ -36,7 +36,6 @@ From: ubuntu:18.04
     cd /HOMER
     wget http://homer.ucsd.edu/homer/configureHomer.pl
     perl /HOMER/configureHomer.pl -install
-    perl /HOMER/configureHomer.pl -install hg19
 
     mkdir /PEAS
     cd /PEAS

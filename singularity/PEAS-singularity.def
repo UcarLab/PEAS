@@ -1,0 +1,54 @@
+Bootstrap: library
+From: ubuntu:18.04
+
+%post
+    apt-get -y update
+    apt-get install -y wget
+    apt-get install -y gcc
+    apt-get install -y g++
+    apt-get install -y zip
+    apt-get install -y unzip
+    apt-get install -y make
+    apt-get install -y bzip2
+    apt-get install -y libbz2-dev
+    apt-get install -y zlib1g-dev
+    apt-get install -y liblzma-dev
+    apt-get install -y default-jre
+    apt-get install -y python3.6
+    apt-get install -y software-properties-common
+    apt-add-repository universe
+    apt-get -y update
+    apt-get install -y python3-pip
+    yes | pip3 install numpy cython
+    yes | pip3 install pandas scikit-learn matplotlib
+    yes | pip3 install MACS2
+
+    mkdir /SAMTOOLS
+    cd /SAMTOOLS
+    wget https://github.com/samtools/samtools/releases/download/1.11/samtools-1.11.tar.bz2
+    tar -jxvf samtools-1.11.tar.bz2
+    cd /SAMTOOLS/samtools-1.11/
+    ./configure --prefix=/SAMTOOLS/ --without-curses
+    make
+    make install
+
+    mkdir /HOMER
+    cd /HOMER
+    wget http://homer.ucsd.edu/homer/configureHomer.pl
+    perl /HOMER/configureHomer.pl -install
+    perl /HOMER/configureHomer.pl -install hg19
+
+    mkdir /PEAS
+    cd /PEAS
+    wget https://github.com/UcarLab/PEAS/releases/download/v1.2/PEAS_v1.2.zip
+    unzip PEAS_v1.2.zip
+
+
+%environment
+    export PATH=/HOMER/bin/:$PATH
+    export PATH=/SAMTOOLS/bin:$PATH
+    export PATH=/PEAS/:$PATH
+
+%labels
+    Author Asa Thibodeau
+    PEASVersion v1.1

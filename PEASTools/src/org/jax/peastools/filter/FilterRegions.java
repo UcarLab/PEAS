@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.jax.peastools.util.Location;
 import org.jax.peastools.util.Util;
@@ -15,17 +16,46 @@ public class FilterRegions {
 	public static void main(String[] args){
 		FilterRegions fb = new FilterRegions();
 		try {
-			fb.filter(args[0], args[1], args[2]);
+			TreeSet<String> chromosomes = new TreeSet<String>();
+			if(args.length > 3) {
+				chromosomes = fb.getChromosomes(args[3]);
+			}
+			else {
+				chromosomes = fb.getDefaultChromosomes();
+			}
+			
+			fb.filter(args[0], args[1], chromosomes, args[2]);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
+	
+	private TreeSet<String> getDefaultChromosomes(){
+		TreeSet<String> rv = new TreeSet<String>();
+		for(int i = 1; i< 23; i++) {
+			rv.add("chr"+Integer.toString(i));
+		}
+		return rv;
+	}
+	
+	private TreeSet<String> getChromosomes(String file) throws IOException{
+		BufferedReader br = new BufferedReader(new FileReader(file));
+		
+		TreeSet<String> rv = new TreeSet<String>();
+		
+		while(br.ready()) {
+			rv.add(br.readLine());
+		}
+		
+		br.close();
+		
+		return rv;
+	}
 
-	public void filter(String peakfile, String filter, String out) throws IOException{
+	public void filter(String peakfile, String filter, TreeSet<String> chromosomes, String out) throws IOException{
 		Util u = new Util();
 		BEDPeak[] allpeaks = readPeaks(peakfile).values().toArray(new BEDPeak[0]);
 		Location[] blacklistpeaks = u.readLocationsWithIds(filter);
-		
 		TreeMap<String, Location[]> allsorted = u.getChrStartSorted(allpeaks);
 		TreeMap<String, Location[]> blsorted = u.getChrStartSorted(blacklistpeaks);
 		
@@ -34,15 +64,8 @@ public class FilterRegions {
 		BufferedWriter bw = new BufferedWriter(new FileWriter(out));
 		for(int i = 0; i < chrs.length; i++){
 			String curchr = chrs[i];
-			int chridx = 23;
-			try{
-				chridx = Integer.parseInt(curchr.replace("chr", ""));
-			}
-			catch(NumberFormatException e){
-			}
-			
-			//Only chromosomes 1-22
-			if(chridx < 1 || chridx >= 23){
+
+			if(!chromosomes.contains(curchr)){
 				continue;
 			}
 			

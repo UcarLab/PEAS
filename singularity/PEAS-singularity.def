@@ -45,7 +45,7 @@ From: ubuntu:18.04
 
     mkdir /PEAS
     cd /PEAS
-    wget https://github.com/UcarLab/PEAS/releases/download/v1.2/PEAS_v1.2.zip
+    wget https://github.com/UcarLab/PEAS/releases/download/v1.2.1/PEAS_v1.2.1.zip
     unzip PEAS_v1.2.zip
 
 

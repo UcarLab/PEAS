@@ -56,7 +56,7 @@ macs2 callpeak -t ${prefix}_sorted.bam.${nfrsize}.bam -f BAMPE -n ${prefix} -g '
 
 #Filter error prone regions
 echo "--- Filtering peaks. ---"
-java -jar "${jarpath}PEASTools.jar" filter "${prefix}_peaks.narrowPeak" "${filterpeaks}" "${prefix}_peaks.filtered"
+java -jar "${jarpath}PEASTools.jar" filter "${prefix}_peaks.narrowPeak" "${filterpeaks}" "${prefix}_peaks.filtered"${CHRFILE}
 
 
 echo "--- Calling annotations & known motifs. ---"

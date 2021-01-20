@@ -1,5 +1,10 @@
 # PEAS (Predict Enhancers from ATAC-seq) #
 
+## NEW: Singularity image file (.sif) ##
+The latest release (v1.2) provides a singularity image file and definition. Documentation for using this image can be found in the /singularity/ folder. This image sets up the environment to successfully run PEAS (after configuring the reference genomes) while reducing the number of user inputs for making promoter & enhancer predictions.
+
+*Note: Please have enough disk space for 5x the size of the input bamfile.*
+
 ## Requirements & Dependencies ##
 
 1. Bash (can execute shell scripts)

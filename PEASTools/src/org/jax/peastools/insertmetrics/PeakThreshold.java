@@ -8,10 +8,13 @@ import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
 import htsjdk.samtools.ValidationStringency;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.TreeMap;
 
 
@@ -19,15 +22,44 @@ public class PeakThreshold {
 	
 	public static void main(String[] args){
 		PeakThreshold pt = new PeakThreshold();
-		pt.doIt(args[0], args[1]);
+		String[] chrlist = null;
+		if(args.length < 3) {
+			chrlist = pt.getDefaultChrListHuman();
+		}
+		else {
+			try {
+				chrlist = pt.getChrList(args[2]);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		pt.doIt(args[0], args[1], chrlist);
 	}
 	
-	private void doIt(String in, String out){
+	private String[] getDefaultChrListHuman() {
+		String[] rv = new String[23];
+		for(int i = 1; i < 23; i++) {
+			rv[i-1] = "chr"+Integer.toString(i); 
+		}
+		return rv;
+	}
+	
+	private String[] getChrList(String path) throws IOException {
+		BufferedReader br = new BufferedReader(new FileReader(path));
+		LinkedList<String> rv = new LinkedList<String>();
+		while(br.ready()) {
+			rv.add(br.readLine());
+		}
+		br.close();
+		return rv.toArray(new String[0]);
+	}
+	
+	private void doIt(String in, String out, String[] chrlist){
 		if(out.endsWith("/")){
 			out = out.substring(0, out.length()-1);
 		}
 		try {
-			writeFile(out, getThreshold(in, out));
+			writeFile(out, getThreshold(in, chrlist, out));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -40,7 +72,7 @@ public class PeakThreshold {
 		bw.close();
 	}
 
-	private int getThreshold(String bamfile, String outdir){
+	private int getThreshold(String bamfile, String[] chromosomes, String outdir){
 		SamReaderFactory factory = SamReaderFactory.makeDefault()
 	              .enable(SamReaderFactory.Option.INCLUDE_SOURCE_IN_RECORDS, SamReaderFactory.Option.VALIDATE_CRC_CHECKSUMS)
 	              .validationStringency(ValidationStringency.SILENT);
@@ -48,8 +80,8 @@ public class PeakThreshold {
 		
 		TreeMap<String, SAMFileWriter> writers = new TreeMap<String, SAMFileWriter>();
 		
-		for(int i = 1; i < 23; i++){
-			String key = "chr"+i;
+		for(int i = 0; i < chromosomes.length; i++){
+			String key = chromosomes[i];
 			writers.put(key, new SAMFileWriterFactory().makeBAMWriter(reader.getFileHeader(), 
 				true, new File(outdir+"/"+key+".bam")));
 		}

@@ -16,15 +16,29 @@ filterpeaks="${args[5]}"
 homermotifs="${args[6]}"
 conservation="${args[7]}"
 ctcfmotifs="${args[8]}"
+jarpath="${args[9]}/"
+
 nfrsize="150"
+
+CHROMOSOMES=()
+CHRFILE=""
+if [[ "$#" -gt 10 ]]; then
+    CHRFILE="${args[10]}"
+    while IFS= read -r line; do
+        CHROMOSOMES+=("$line")
+    done < ${CHRFILE}
+    CHRFILE=" ${CHRFILE}"
+else
+    for i in {1..22}
+    do
+        CHROMOSOMES+=("chr$i")
+    done
+fi
 
 cd "${outDir}"
 
 mkdir peak_features
 cd peak_features
-
-jarpath="${args[9]}/"
-
 
 ##Sort BAM  #TODO add option to skip this step if already sorted
 echo "--- Sorting bam file. ---"
@@ -66,19 +80,19 @@ annotatePeaks.pl "${prefix}_peaks.filtered" "${homerref}" -m "${ctcfmotifs}" -nm
 
 #Get the insert size threshold to remove outlier inserts
 echo "--- Getting insert size threshold. ---"
-java -jar "${jarpath}PEASTools.jar" insertsizethresh "${prefix}_sorted.bam" "${outDir}/peak_features"
+java -jar "${jarpath}PEASTools.jar" insertsizethresh "${prefix}_sorted.bam" "${outDir}/peak_features"${CHRFILE}
 thresh=$(cat "thresh.txt")
 
 
 #Get Insert features
 echo "--- Getting insert features. ---"
-for i in {1..22}
+for i in ${CHROMOSOMES[@]}
 do
-    chr=chr$i
+    chr=${i}
     java -jar "${jarpath}PEASTools.jar" insertmetrics "$chr" "${chr}.bam" "${prefix}_peaks.filtered" "${prefix}_${chr}_insertmetrics.txt" "$thresh"
-rm ${chr}.bam
+    rm ${chr}.bam
     cat ${prefix}_${chr}_insertmetrics.txt >> ${prefix}_insertmetrics.txt
-rm "${prefix}_${chr}_insertmetrics.txt"
+    rm "${prefix}_${chr}_insertmetrics.txt"
 done
 
 echo "--- Getting conservation scores. ---"

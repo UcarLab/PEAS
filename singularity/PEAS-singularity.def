@@ -19,8 +19,14 @@ From: ubuntu:18.04
     apt-add-repository universe
     apt-get -y update
     apt-get install -y python3-pip
+    apt-get install -y python-pip
+    apt-get install -y python-tk
     yes | pip3 install numpy cython
     yes | pip3 install pandas scikit-learn matplotlib
+    yes | pip install scipy
+    yes | pip install scikit-learn==0.18.1
+    yes | pip install pandas
+    yes | pip install matplotlib
     yes | pip3 install MACS2
 
     mkdir /SAMTOOLS
@@ -48,6 +54,9 @@ From: ubuntu:18.04
     export PATH=/SAMTOOLS/bin:$PATH
     export PATH=/PEAS/:$PATH
 
+%runscript
+    exec /PEAS/singularity/PEAS-singularity.sh "$@"
+
 %labels
     Author Asa Thibodeau
-    PEASVersion v1.1
+    PEASVersion v1.2

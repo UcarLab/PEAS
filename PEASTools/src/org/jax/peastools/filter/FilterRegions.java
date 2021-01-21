@@ -15,6 +15,10 @@ public class FilterRegions {
 	
 	public static void main(String[] args){
 		FilterRegions fb = new FilterRegions();
+		if(args.length > 4 || args.length < 3) {
+			System.out.println("Usage: PEASTools.jar filter <peakfile> <filterfile> <outputfile> [chromosomes]");
+			System.exit(0);
+		}
 		try {
 			TreeSet<String> chromosomes = new TreeSet<String>();
 			if(args.length > 3) {
@@ -70,7 +74,10 @@ public class FilterRegions {
 			}
 			
 			Location[] peaks = allsorted.get(curchr);
-			Location[] blpeaks = blsorted.get(curchr);
+			Location[] blpeaks = new Location[0];
+			if(blsorted.containsKey(curchr)) {
+				blpeaks = blsorted.get(curchr);
+			}
 			
 			int bli = 0;
 			int pi = 0;
